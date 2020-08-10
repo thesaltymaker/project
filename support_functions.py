@@ -1,6 +1,6 @@
 import argparse
 import torch
-
+import json
 
 
 def get_input_args_train():
@@ -33,16 +33,16 @@ def get_input_args_train():
     # Create Parse using ArgumentParser
     parser = argparse.ArgumentParser()
 
-    # Create 3 command line arguments as mentioned above using add_argument() from ArguementParser method
-    parser.add_argument('--dir', type = str, default = 'flowers/', 
-                    help = 'path to the data directory, default "flowers/"') 
-    parser.add_argument('--save_dir', type = str, default = 'models/', 
+    # Create 7 command line arguments as mentioned above using add_argument() from ArguementParser method
+    parser.add_argument('dir', type = str, default = 'flowers', 
+                    help = 'path to the data directory, default "flowers"') 
+    parser.add_argument('--save_dir', type = str, default = 'models', 
                     help = 'save_dir for model, default "models/"') 
     parser.add_argument('--arch', type = str, default = 'vgg16', 
                     help = 'Architeture model, default  "vgg16"') 
     parser.add_argument('--learning_rate', type = float, default = '0.01', 
                     help = 'learning_rate, tune per architecture choice, default "0.01"') 
-    parser.add_argument('--hidden_units', type = tuple, default = '(1024, 512)', 
+    parser.add_argument('--hidden_units', default = '(1024, 512)', 
                     help = 'hidden_units tuple, default "(1024, 512)"') 
     parser.add_argument('--epochs', type = int, default = '7', 
                     help = 'number of epochs to train model, default 7') 
@@ -76,15 +76,14 @@ def get_input_args_predict():
     """
     # Create Parse using ArgumentParser
     parser = argparse.ArgumentParser()
-
     # Create 5 command line arguments as mentioned above using add_argument() from ArguementParser method
-    parser.add_argument('Arg1 path/to/image', type = str, default = 'upload/', 
+    parser.add_argument('path_to_image', type = str, 
                     help = 'path to image, default "upload/"') 
-    parser.add_argument('Arg2 model/checkpoint name', type = str, default = 'checkpoint', 
+    parser.add_argument('checkpoint', type = str, default = 'checkpoint', 
                     help = 'path to the data directory, default "checkpoint"') 
     parser.add_argument('--topk', type = int, default = '5', 
                     help = 'Number of top predictions, default  "5"') 
-    parser.add_argument('--category_name', type = str, default = 'cat_to_name', 
+    parser.add_argument('--category_name', type = str, default = 'cat_to_name.json', 
                     help = 'JSON file with mapping of index to category, default "cat_to_name"') 
     parser.add_argument('--gpu', action = 'store_true', default = False,
                help = 'Toggle to turn on GPU for prediction, default is "CPU"') 
