@@ -26,7 +26,7 @@ def main():
     #process args
     path_to_image = in_arg.path_to_image
     checkpoint_name =  in_arg.checkpoint + '.pth'
-    topk = in_arg.topk
+    topk = in_arg.top_k
     category_name = in_arg.category_name
     device = in_arg.gpu
     
