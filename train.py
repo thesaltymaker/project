@@ -16,37 +16,30 @@ def main():
     model_save_dir = 'models'
     model = 'vgg16'
     learning_rate = 0.01
-    #input_size = 
     hidden_units = [1024, 512]
     output_size = 102
     epochs = 7
     device = 'cpu'
+    
     # get input arguments
     in_arg = get_input_args_train()
     model = in_arg.arch
     model_save_dir = in_arg.save_dir
-    #hidden_units = in_arg.hidden_units
-    
-    # validate the training inputs
-    
-    # process --GPU argument
+    hidden_units = in_arg.hidden_units
     data_dir = in_arg.dir
-    
-    print(in_arg.gpu)
     device = set_device(in_arg.gpu)
     epochs = in_arg.epochs
     arch = in_arg.arch
+    print("Training Platform:")
     print(device)
     
     # prepare the data loaders
     trainloader, testloader, validloader, label_idx = prepare_date(data_dir)
     
     #create the new model, return model, optimizer and criterion
-    model, optimizer, criterion = create_model(arch, hidden_units, output_size, learning_rate)
+    model, optimizer, criterion = create_model_gen(arch, hidden_units, output_size, learning_rate)
     
-    # retrive the model set the optimizer and criterion
-    #model, optimizer, criterion = load_checkpoint(model_save_dir, model, learning_rate)
-    
+    print("The Model:")
     print(model)
    
     # train the network
@@ -57,9 +50,7 @@ def main():
     test_model(model, validloader, device, criterion)
     
     # save the network 
-    checkpoint_name = 'checkpoint1.pth'
-    checkpoint_dir = 'models'
-    save_model(model, optimizer, hidden_units, output_size, epochs, checkpoint_name, checkpoint_dir, label_idx, arch)
+    save_model(model, optimizer, hidden_units, output_size, epochs, model_save_dir, label_idx, arch)
     
     
     

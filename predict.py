@@ -9,8 +9,6 @@ from support_functions import *
 from model_functions import *
 from predict_functions import *
 
-
-
 # Main program function defined below
 def main():
     
@@ -32,28 +30,25 @@ def main():
     
     
     # process --GPU argument
-    
-    print(device)
     device = set_device(device)
     print(device)
     
-    #read the default or inouted json file
+    # read the default or inouted json file
     with open(category_name, 'r') as f:
         cat_to_name = json.load(f)
     
     
-    #load the model from the input
-    model, optimizer, criterion = load_checkpoint_predict(checkpoint_name)
+    # load the model from the input
+    model, optimizer, criterion = load_checkpoint_predict(checkpoint_name, device)
     print(model)
     
-    #prepare the input image for processing
-    #np_image = process_image(path_to_image)
-    
-    
-    #make the prediction and match clases to name from json file
+       
+    # make the prediction and match clases to name from json file
     probs, classes = predict(path_to_image, model, topk, device)
 
-    print_results(probs, classes, topk, cat_to_name)
+    
+    # print the results
+    print_results(probs, classes, topk, cat_to_name, model.idx_to_class)
     
 main()
     

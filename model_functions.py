@@ -42,9 +42,7 @@ def prepare_date(data_dir):
     testloader = torch.utils.data.DataLoader(test_data, batch_size=64, shuffle=True)
     validloader = torch.utils.data.DataLoader(valid_data, batch_size=64)
     
-    #debug
     label_idx = train_data.class_to_idx
-    print(label_idx)
     return trainloader, testloader, validloader, label_idx
 
 #create a new classifier model
@@ -55,6 +53,7 @@ def create_model(model_name, hidden_sizes, output_size, learning_rate):
     for param in model.parameters():
         param.requires_grad = False
     input_size = model.classifier[0].in_features
+
     # Build a feed-forward network for classifier 
     # Citaton help from ask a mentor: https://knowledge.udacity.com/questions/295613
     classifier = nn.Sequential(OrderedDict([
@@ -75,71 +74,47 @@ def create_model(model_name, hidden_sizes, output_size, learning_rate):
     
     return model, optimizer, criterion
 
-
-
-
-#load model for trianing
-def load_checkpoint_train(filepath, model_name, learning_rate):
-    print(filepath+"/checkpoint.pth")
-    checkpoint = torch.load(filepath+"/checkpoint.pth")
-    
-    #model = models.vgg16(pretrained=True)
-    
+def create_model_gen(model_name, hidden_sizes, output_size, learning_rate):
     # citation for using --arch to load the corect model: https://knowledge.udacity.com/questions/262667
     model = getattr(models, model_name)(pretrained=True)
     for param in model.parameters():
         param.requires_grad = False
+    input_size = model.classifier[0].in_features
+    dropout = 0.3
     
-    # Build a feed-forward network for classifier 
-    # Citaton help from ask a mentor: https://knowledge.udacity.com/questions/295613
-    classifier = nn.Sequential(OrderedDict([
-         ('inputs', nn.Linear(checkpoint['input_size'], checkpoint['hidden_sizes'][0])),
-         ('relu1', nn.ReLU()),
-         ('dropout1', nn.Dropout(p=0.3, inplace=False)),
-         ('hidden_layer1', nn.Linear(checkpoint['hidden_sizes'][0],checkpoint['hidden_sizes'][1])),
-         ('relu2', nn.ReLU()),
-         ('dropout2', nn.Dropout(p=0.2, inplace=False)),
-         ('hidden_layer2', nn.Linear(checkpoint['hidden_sizes'][1], checkpoint['output_size'])),
-         ('relu3', nn.ReLU()),
-         ('Softmax1', nn.LogSoftmax(dim=1))]))
+    #Citation:  Adapted from Ask a Mentor:  https://knowledge.udacity.com/questions/298013
+    #create a dictionary
+    classifier_dict = []
+    #Create a list of the layer sizes
+    feature_in_out = [input_size] + hidden_sizes + [output_size]    
+    feature_pairs = list(zip(feature_in_out, feature_in_out[1:]))
+    for i, x in enumerate(feature_pairs):
+        classifier_dict.append(('fc' + str(i+1), nn.Linear(*(feature_pairs[i]))))
+        classifier_dict.append(('relu' + str(i+1), nn.ReLU()))
+        # use dropout for first three layers, but not on the last layer
+        if i< (len(feature_in_out) -2) and dropout > 0.0:
+            classifier_dict.append(('dropout' + str(i+1), nn.Dropout(p=dropout)))
+            dropout -= 0.1
+    classifier_dict.append(('output', nn.LogSoftmax(dim=1)))
+    #print(classifier_dict)
+    
+    # Classifier
+    classifier = nn.Sequential(OrderedDict(classifier_dict))
     model.classifier = classifier
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model.class_to_idx = checkpoint['class_to_idx'] 
-    model.idx_to_class = checkpoint['idx_to_class']
 
     # Set criterion and optimizer paramters
     criterion = nn.CrossEntropyLoss() #for use with softmax
     optimizer = optim.SGD(model.classifier.parameters(), lr=learning_rate)
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     
     return model, optimizer, criterion
 
+
 # load model for prediction   
-def load_checkpoint_predict(checkpoint_name):
-    print(checkpoint_name)
-    checkpoint = torch.load(checkpoint_name)
+def load_checkpoint_predict(checkpoint_name, device):
+    print("checkpoint: " + checkpoint_name)
+    checkpoint = torch.load(checkpoint_name, map_location='cpu')
     model = checkpoint['model']
-    #model = models.vgg16(pretrained=True)
-    
-    # citation for using --arch to load the corect model: https://knowledge.udacity.com/questions/262667
-    #model = getattr(models, model_name)(pretrained=True)
-    #for param in model.parameters():
-    #    param.requires_grad = False
-    
-    # Build a feed-forward network for classifier 
-    # Citaton help from ask a mentor: https://knowledge.udacity.com/questions/295613
-    #classifier = nn.Sequential(OrderedDict([
-    #     ('inputs', nn.Linear(checkpoint['input_size'], checkpoint['hidden_sizes'][0])),
-    #     ('relu1', nn.ReLU()),
-    #     ('dropout1', nn.Dropout(p=0.3, inplace=False)),
-    #     ('hidden_layer1', nn.Linear(checkpoint['hidden_sizes'][0],checkpoint['hidden_sizes'][1])),
-    #     ('relu2', nn.ReLU()),
-    #     ('dropout2', nn.Dropout(p=0.2, inplace=False)),
-    #     ('hidden_layer2', nn.Linear(checkpoint['hidden_sizes'][1], checkpoint['output_size'])),
-    #     ('relu3', nn.ReLU()),
-    #     ('Softmax1', nn.LogSoftmax(dim=1))]))
     model.classifier = checkpoint['classifier']
-    #model = nn.Sequential(checkpoint['classifier'])
     model.load_state_dict(checkpoint['model_state_dict'])
     model.class_to_idx = checkpoint['class_to_idx'] 
     model.idx_to_class = checkpoint['idx_to_class']
@@ -152,15 +127,11 @@ def load_checkpoint_predict(checkpoint_name):
     return model, optimizer, criterion
 
 #save model
-#print("Our model: \n\n", model, '\n
-def save_model(model, optimizer, hidden_sizes, output_size, epochs, checkpoint_name, checkpoint_dir, label_idx, model_name):
-    print("The state dict keys: \n\n", model.state_dict().keys())
-    torch.save(model.state_dict(), 'checkpoint.pth')
-    print("The oprimizer state dict keys: \n\n", optimizer.state_dict().keys())
-    torch.save(optimizer.state_dict(), 'checkpoint.pth')
+def save_model(model, optimizer, hidden_sizes, output_size, epochs, checkpoint_dir, label_idx, model_name):
     model.class_to_idx = label_idx
     input_size = model.classifier[0].in_features
-    #Citation: https://stackoverflow.com/questions/483666/reverse-invert-a-dictionary-mapping
+
+    #Citation to reverse a dictionary: https://stackoverflow.com/questions/483666/reverse-invert-a-dictionary-mapping
     model.idx_to_class = {v: k for k, v in model.class_to_idx.items()}
 
     checkpoint = {'input_size': input_size,
@@ -199,7 +170,6 @@ def validation(model, validloader, criterion, device):
     return test_loss, accuracy
 
 
-#train model
 #Train the classifier
 def train_model(model, trainloader, validloader, device, epochs, optimizer, criterion):
     print(str (epochs) )
@@ -209,6 +179,7 @@ def train_model(model, trainloader, validloader, device, epochs, optimizer, crit
     running_loss = 0
     for e in range(epochs):
         model.train() 
+        start = time.time()
         for images, labels in trainloader:
             steps +=1   
         
@@ -217,7 +188,7 @@ def train_model(model, trainloader, validloader, device, epochs, optimizer, crit
             # Move input and label tensors to the GPU
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
-            start = time.time()
+            
             outputs = model.forward(images)
             loss = criterion(outputs, labels)
             loss.backward()

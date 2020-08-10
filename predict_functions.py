@@ -44,11 +44,6 @@ def process_image(image):
     
     
 def predict(image_path, model, top, device):
-    ''' Predict the class (or classes) of an image using a trained deep learning model.
-    '''
-    
-    # TODO: Implement the code to predict the class from an image file
-    
     # process the image
     image_tensor = process_image(image_path)
     
@@ -56,8 +51,11 @@ def predict(image_path, model, top, device):
     image_tensor = image_tensor.unsqueeze_(0).float()
         
     # Execute the model
+    model.to(device)
     model.eval()
+    #labels = model.idx_to_class
     labels = model.class_to_idx
+    #print(model.idx_to_class)
     
     # apply input and labels to device, run model
     img_in = image_tensor.to(device)
@@ -65,44 +63,30 @@ def predict(image_path, model, top, device):
     
     #reverse output to percentages and get topk 5
     output_tensor = torch.exp(output)
-    probs, classes= output_tensor.topk(top, dim=1)
+    probs, classes = output_tensor.topk(top, dim=1)
     
     return probs, classes
     
     
     
     
-def print_results(probs, classes, topk, cat_to_name):
+def print_results(probs, classes, topk, cat_to_name, idx_to_class):
   
-    print(probs)
-    print(classes)
+    #print(probs)
+    #print(classes)
 
     #convert the tensors and reverse the output for probs and classes
-#    np_probs = np.flipud(probs[0].detach().cpu().numpy())
-#    np_classes = np.flipud(classes[0].detach().cpu().numpy())
-#    for i in range (topk):
-#        print(str(i) + " " + str(np_probs[i]) +" " + str((cat_to_name.get(str(np_classes[i])))))
+    #    np_probs = np.flipud(probs[0].detach().cpu().numpy())
+    #    np_classes = np.flipud(classes[0].detach().cpu().numpy())
+    #    for i in range (topk):
+    #        print(str(i) + " " + str(np_probs[i]) +" " + str((cat_to_name.get(str(np_classes[i])))))
     np_probs = np.array(probs[0].detach().cpu().numpy())
-    np_classes = np.array(classes[0].detach().cpu().numpy())    
+    np_classes = np.array(classes[0].detach().cpu().numpy())   
+   
+    #classes to idx, then idx to name
     for i in range (topk):
-        print(str(i) + " " + str(np_probs[i]) +" " + str((cat_to_name.get(str(np_classes[i])))))
+         print(str(i) + " " + str(np_probs[i]) +" " + str((cat_to_name.get(str(idx_to_class[np_classes[i]])))))
+        
+    return
 
 
-    #print (cat_to_name.get(str(np_classes[2])) )
-
-    #print (cat_to_name)
-#fig, (ax1, ax2) = plt.subplots(figsize=(10,10), ncols=2)
-#ax1.axis('off')
-#ax2.barh(np.arange(5), np_probs)
-#ax2.set_aspect(0.1)
-#ax2.set_yticks(np.arange(5))
-#ax2.set_yticklabels([cat_to_name.get(str(np_classes[0])),
-#            cat_to_name.get(str(np_classes[1])),
-#            cat_to_name.get(str(np_classes[2])),
-#            cat_to_name.get(str(np_classes[3])),
-#            cat_to_name.get(str(np_classes[4]))], 
-#            size='medium');
-#ax2.set_title('Class Probability')
-#ax2.set_xlim(0, 1.1)#
-
-#plt.tight_layout()
