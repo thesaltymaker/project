@@ -110,9 +110,13 @@ def create_model_gen(model_name, hidden_sizes, output_size, learning_rate):
 
 
 # load model for prediction   
-def load_checkpoint_predict(checkpoint_name, device):
+def load_checkpoint_predict(checkpoint_name):
     print("checkpoint: " + checkpoint_name)
-    checkpoint = torch.load(checkpoint_name, map_location='cpu')
+    if torch.cuda.is_available():
+        device_string = "cuda:0" 
+    else: 
+        device_string = "cpu"
+    checkpoint = torch.load(checkpoint_name, map_location=device_string)
     model = checkpoint['model']
     model.classifier = checkpoint['classifier']
     model.load_state_dict(checkpoint['model_state_dict'])

@@ -39,7 +39,7 @@ def main():
     
     
     # load the model from the input
-    model, optimizer, criterion = load_checkpoint_predict(checkpoint_name, device)
+    model, optimizer, criterion = load_checkpoint_predict(checkpoint_name)
     print(model)
     
        

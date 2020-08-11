@@ -39,12 +39,11 @@ def get_input_args_train():
     parser.add_argument('--save_dir', type = str, default = 'models', 
                     help = 'save_dir for model, default "models/"') 
     parser.add_argument('--arch', type = str, default = 'vgg16', 
-                    help = 'Architeture model, default  "vgg16"') 
+                    help = 'Architeture model supports vgg13 and vgg16, default  "vgg16"') 
     parser.add_argument('--learning_rate', type=float, default = '0.01', 
                     help = 'learning_rate, tune per architecture choice, default "0.01"') 
     parser.add_argument('--hidden_units', nargs='+', type=int, default = [1024, 512], 
                     help = 'hidden_units list , default [1024, 512]') 
-    #parser.add_argument('-l','--list', nargs='+', help='<Required> Set flag', required=True)
     parser.add_argument('--epochs', type = int, default = '7', 
                     help = 'number of epochs to train model, default 7') 
     parser.add_argument('--gpu', action = 'store_true', default = False,
