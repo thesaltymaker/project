@@ -1,2 +1,2 @@
 #python3 train.py flowers --save_dir models --gpu --arch vgg16 --epochs 12 --hidden_units 1024 512 --learning_rate 0.01
-python3 train.py flowers --save_dir models --gpu --arch vgg13 --epochs 12 --hidden_units 1024 512 --learning_rate 0.01
+python3 train.py flowers --save_dir models --gpu --arch vgg13 --epochs 12 --hidden_units 1024 512 --learning_rate 0.02

@@ -75,6 +75,7 @@ def create_model(model_name, hidden_sizes, output_size, learning_rate):
     return model, optimizer, criterion
 
 def create_model_gen(model_name, hidden_sizes, output_size, learning_rate):
+    print(model_name)
     # citation for using --arch to load the corect model: https://knowledge.udacity.com/questions/262667
     model = getattr(models, model_name)(pretrained=True)
     for param in model.parameters():

@@ -30,6 +30,9 @@ def main():
     device = set_device(in_arg.gpu)
     epochs = in_arg.epochs
     arch = in_arg.arch
+    learning_rate = in_arg.learning_rate
+    
+    
     print("Training Platform:")
     print(device)
     

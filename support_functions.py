@@ -41,7 +41,7 @@ def get_input_args_train():
     parser.add_argument('--arch', type = str, default = 'vgg16', 
                     help = 'Architeture model supports vgg13 and vgg16, default  "vgg16"') 
     parser.add_argument('--learning_rate', type=float, default = '0.01', 
-                    help = 'learning_rate, tune per architecture choice, default "0.01"') 
+                    help = 'learning_rate, tune per architecture choice, default 0.01') 
     parser.add_argument('--hidden_units', nargs='+', type=int, default = [1024, 512], 
                     help = 'hidden_units list , default [1024, 512]') 
     parser.add_argument('--epochs', type = int, default = '7', 
